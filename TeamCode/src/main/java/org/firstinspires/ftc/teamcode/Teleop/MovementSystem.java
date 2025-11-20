@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Teleop;
 
 
 import java.lang.Math;
@@ -9,12 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class MovementSystem {
     OpMode opMode;
-
-
-    DcMotor motorTopRight0;
-    DcMotor motorTopLeft1;
-    DcMotor motorBottomRight2;
-    DcMotor motorBottomLeft3;
+    DcMotor motorTopRight0, motorTopLeft1, motorBottomRight2, motorBottomLeft3;
 
 
     final double NORMAL_MOVE_SPEED = 0.5;
@@ -32,7 +27,8 @@ public class MovementSystem {
         motorTopRight0 = opMode.hardwareMap.get(DcMotor.class, "frontRight");
         motorBottomRight2 = opMode.hardwareMap.get(DcMotor.class, "backRight");
         motorTopLeft1 = opMode.hardwareMap.get(DcMotor.class, "frontLeft");
-        motorBottomLeft3.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorTopLeft1.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorTopRight0.setDirection(DcMotorSimple.Direction.REVERSE);
     }
     public void loop()
     {
@@ -49,7 +45,7 @@ public class MovementSystem {
     public void HandleMoveInput()
     {
         double moveDirX = opMode.gamepad1.left_stick_x;
-        double moveDirY = opMode.gamepad1.left_stick_y;
+        double moveDirY = -opMode.gamepad1.left_stick_y;
         double magnitude = Math.sqrt(moveDirX * moveDirX + moveDirY * moveDirY);
 
         //sprint mode
