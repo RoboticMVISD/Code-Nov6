@@ -18,7 +18,7 @@ public class Intake {
     }
 
     public void loop(){
-        moveIntakeConOne();
+        campbellMoveIntakeConOne();
     }
 
     public void moveIntakeConOne(){
@@ -52,4 +52,26 @@ public class Intake {
         }
     }
 
+    //Just Campbell's Preferences for intake. Sub out for normal when he uses controller
+    public void campbellMoveIntakeConOne(){
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        if (op.gamepad1.a){
+            intake.setPower(INTAKE_SPEED);
+        } else if (op.gamepad1.b){
+            intake.setPower(-INTAKE_SPEED);
+        } else if(op.gamepad1.y){
+            secondaryIntake.setPower(1);
+        } else if (op.gamepad1.x){
+            secondaryIntake.setPower(-1);
+        }else if (op.gamepad1.dpad_up){
+            Shooter.leftShooter.setPower(-BALL_SUPRESSOR_SPEED);
+            Shooter.rightShooter.setPower(-BALL_SUPRESSOR_SPEED);
+        } else if (op.gamepad1.right_trigger > 0){
+            intake.setPower(1);
+            secondaryIntake.setPower(1);
+        }else {
+            intake.setPower(0);
+            secondaryIntake.setPower(0);
+        }
+    }
 }

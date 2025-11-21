@@ -9,16 +9,24 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter {
+    //Initializes all variables required to shoot. Motors on turret, blocker servos, and feeder/turret CRServos
     OpMode op;
     public static DcMotorEx leftShooter, rightShooter;
     CRServo turretRotator, leftFeeder, rightFeeder;
     Servo blocker;
 
+    //Velocity Tester increments for shooterTesterConTwo()
+    double TESTVELOCITY = 500;
+    int SMALL_INCREMENT = 50;
+    int LARGE_INCREMENT = 100;
+
     //Max Velocity range is -2500 to 2500
-    double SPIN_UP_VELOCITY = 1000;
+    double SPIN_UP_VELOCITY_SHORTRANGE = 950;
+    double SPIN_UP_VELOCITY_MEDIUMRANGE = 1050;
+    double SPIN_UP_VELOCITY_LONGRANGE = 1250;
     double MIN_PWR_BLOCKER = -1;
     double MAX_PWR_BLOCKER = 1;
-    double ROTATE_PWR = 0.5;
+    double TURRET_ROTATE_SPEED = 0.2;
 
     //PIDF Variables
     public static double proportional = 300;
@@ -58,31 +66,35 @@ public class Shooter {
     public void loop() throws InterruptedException {
         shooterConOne();
         shooterTesterConTwo();
-        rotateTurret();
+        campbellRotateTurret();
     }
 
     public void shooterConTwo(){
-        if (op.gamepad2.y){
-            autoAimTurret();
+        if (op.gamepad2.right_trigger > 0){
+            rightShooter.setVelocity(SPIN_UP_VELOCITY_LONGRANGE);
+            leftShooter.setVelocity(SPIN_UP_VELOCITY_LONGRANGE);
         }else if (op.gamepad2.right_bumper){
-            rightShooter.setVelocity(SPIN_UP_VELOCITY);
-            leftShooter.setVelocity(SPIN_UP_VELOCITY);
-        } else if (op.gamepad2.dpad_up){
+            rightShooter.setVelocity(SPIN_UP_VELOCITY_MEDIUMRANGE);
+            leftShooter.setVelocity(SPIN_UP_VELOCITY_MEDIUMRANGE);
+        } else if (op.gamepad2.y){
+            rightShooter.setVelocity(SPIN_UP_VELOCITY_SHORTRANGE);
+            leftShooter.setVelocity(SPIN_UP_VELOCITY_SHORTRANGE);
+        }else if (op.gamepad2.dpad_up){
             leftFeeder.setPower(MAX_PWR_BLOCKER);
             rightFeeder.setPower(MAX_PWR_BLOCKER);
         } else if (op.gamepad2.dpad_down){
             leftFeeder.setPower(MIN_PWR_BLOCKER);
             rightFeeder.setPower(MIN_PWR_BLOCKER);
         } else if (op.gamepad2.left_bumper){
-            leftShooter.setPower(-SPIN_UP_VELOCITY *0.5);
-            rightShooter.setPower(-SPIN_UP_VELOCITY *0.5);
+            leftShooter.setPower(-SPIN_UP_VELOCITY_SHORTRANGE *0.5);
+            rightShooter.setPower(-SPIN_UP_VELOCITY_SHORTRANGE *0.5);
         }else {
             rightShooter.setPower(0);
             leftShooter.setPower(0);
             leftFeeder.setPower(0);
             rightFeeder.setPower(0);
         }
-        op.telemetry.addLine("Spin Power: " + SPIN_UP_VELOCITY);
+        op.telemetry.addLine("Spin Power: " + rightShooter.getVelocity());
     }
 
     public void shooterConOne(){
@@ -98,40 +110,46 @@ public class Shooter {
     }
 
     public void rotateTurret(){
-        if (op.gamepad2.right_trigger > 0) {
-            turretRotator.setPower(op.gamepad2.right_trigger * ROTATE_PWR);
-        } else if(op.gamepad2.left_trigger > 0){
-            turretRotator.setPower(-op.gamepad2.left_trigger * ROTATE_PWR);
-        }else if (op.gamepad2.dpad_left){
-            turretRotator.setPower(-.1);
+        if (op.gamepad2.dpad_left){
+            turretRotator.setPower(-TURRET_ROTATE_SPEED);
         }else if (op.gamepad2.dpad_right){
-            turretRotator.setPower(.1);
+            turretRotator.setPower(TURRET_ROTATE_SPEED);
         }else {
+            turretRotator.setPower(0);
+        }
+    }
+
+    public void campbellRotateTurret(){
+        if (op.gamepad2.left_trigger > 0){
+            turretRotator.setPower(-TURRET_ROTATE_SPEED);
+        } else if (op.gamepad2.right_trigger > 0){
+            turretRotator.setPower(TURRET_ROTATE_SPEED);
+        } else {
             turretRotator.setPower(0);
         }
     }
 
     public void shooterTesterConTwo() throws InterruptedException {
         if (op.gamepad2.dpadUpWasPressed()){
-            SPIN_UP_VELOCITY += 100;
+            TESTVELOCITY += LARGE_INCREMENT;
         } else if (op.gamepad2.dpadDownWasPressed()){
-            SPIN_UP_VELOCITY -= 100;
+            TESTVELOCITY -= LARGE_INCREMENT;
         } else if (op.gamepad2.dpadLeftWasPressed()){
-            SPIN_UP_VELOCITY -= 50;
+            TESTVELOCITY -= SMALL_INCREMENT;
         } else if (op.gamepad2.dpadRightWasPressed()){
-            SPIN_UP_VELOCITY += 50;
+            TESTVELOCITY += SMALL_INCREMENT;
         } else if (op.gamepad2.right_bumper){
-            rightShooter.setVelocity(SPIN_UP_VELOCITY);
-            leftShooter.setVelocity(SPIN_UP_VELOCITY);
+            rightShooter.setVelocity(TESTVELOCITY);
+            leftShooter.setVelocity(TESTVELOCITY);
         } else if (op.gamepad2.left_bumper) {
-            rightShooter.setVelocity(-SPIN_UP_VELOCITY);
-            leftShooter.setVelocity(-SPIN_UP_VELOCITY);
+            rightShooter.setVelocity(-TESTVELOCITY);
+            leftShooter.setVelocity(-TESTVELOCITY);
         }else {
             leftShooter.setVelocity(0);
             rightShooter.setVelocity(0);
         }
 
-        op.telemetry.addLine("Spin Power Left: " + leftShooter.getVelocity() + " \nSpin Power Right: " + leftShooter.getVelocity() + "\nWhat Power Should be: " + SPIN_UP_VELOCITY);
+        op.telemetry.addLine("Spin Power Left: " + leftShooter.getVelocity() + " \nSpin Power Right: " + leftShooter.getVelocity() + "\nWhat Power Should be: " + TESTVELOCITY);
     }
 
 }

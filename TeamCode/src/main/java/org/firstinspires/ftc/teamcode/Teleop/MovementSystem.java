@@ -12,8 +12,8 @@ public class MovementSystem {
     DcMotor motorTopRight0, motorTopLeft1, motorBottomRight2, motorBottomLeft3;
 
 
-    final double NORMAL_MOVE_SPEED = 0.5;
-    final double MAX_MOVE_SPEED = 0.75;
+    final double NORMAL_MOVE_SPEED = 0.65;
+    final double MAX_MOVE_SPEED = 0.85;
     final double TURN_SPEED = 1.0;
     double maxSpeed = NORMAL_MOVE_SPEED;
     boolean prevIsSprintButtonDown = false;
